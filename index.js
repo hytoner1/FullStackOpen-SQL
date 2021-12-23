@@ -6,7 +6,12 @@ const { PORT } = require('./util/config');
 const { connectToDatabase } = require('./util/db');
 
 const blogsRouter = require('./controllers/blogs');
+const usersRouter = require('./controllers/users');
+const loginRouter = require('./controllers/login');
+
 app.use('/api/blogs', blogsRouter)
+app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
 
 const errorHandler = require('./middleware/errorHandler');
 app.use(errorHandler);
@@ -19,9 +24,3 @@ const start = async () => {
 }
 
 start();
-
-//const bodyParser = require('body-parser');
-//app.use(bodyParser.urlencoded({
-//  extended: true
-//}));
-//app.use(bodyParser.json());

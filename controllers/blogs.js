@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const { Blog } = require('../models');
+const { Blog, User } = require('../models');
 
 
 const blogFinder = async (req, res, next) => {
@@ -8,9 +8,28 @@ const blogFinder = async (req, res, next) => {
   next();
 }
 
+const tokenExtractor = (req, res, next) => {
+  const authorization = req.get('authorization');
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    try {
+      req.decodedToken = jwt.verify(authorization.substring(7), SECRET);
+    } catch {
+      res.status(401).json({ error: 'token invalid' });
+    }
+  } else {
+    res.status(401).json({ error: 'token missing' });
+  }
+  next();
+}
 
 router.get('/', async (req, res) => {
-  const blogs = await Blog.findAll();
+  const blogs = await Blog.findAll({
+    attributes: { exclude: ['userId'] },
+    include: {
+      model: user,
+      attributes: ['name']
+    }
+  });
   console.log(JSON.stringify(blogs, null, 2))
   res.json(blogs);
 })
@@ -38,10 +57,13 @@ router.put('/:id', blogFinder, async (req, res, next) => {
   }
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', tokenExtractor, async (req, res, next) => {
   console.log(req.body);
   try {
-    const blog = await Blog.create(req.body);
+    const user = await User.findOneByPk(req.decodedToken.id);
+    const blog = await Blog.create({
+      ...req.body, userId: user.id, date: new Date()
+    });
     return res.json(blog);
   } catch (e) {
     next(e);
