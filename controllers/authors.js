@@ -14,13 +14,6 @@ router.get('/', async (req, res, next) => {
         [sequelize.fn('sum', sequelize.col('likes')), 'likes'],
       ],
       group: ['author']
-
-      //attributes: {
-      //  include: [
-      //    [fn('COUNT', col('likes')), 'totalLikes']
-      //  ]
-      //},
-      //group: ['author', 'id']
     });
     console.log(JSON.stringify(authors, null, 2))
     res.json(authors);

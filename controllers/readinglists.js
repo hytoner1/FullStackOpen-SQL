@@ -1,10 +1,11 @@
 const router = require('express').Router();
-const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
+
+const { tokenExtractor } = require('../middleware/tokenExtractor');
 
 const { Blog, User, Readinglist } = require('../models');
 
-const { SECRET } = require('../util/config')
+
 
 router.get('/', async (req, res) => {
   const readinglists = await Readinglist.findAll({
@@ -20,6 +21,27 @@ router.post('/', async (req, res, next) => {
     return res.json(readinglist);
   } catch (e) {
     next(e);
+  }
+})
+
+router.put('/:id', tokenExtractor, async (req, res, next) => {
+  const reading = await Readinglist.findByPk(req.params.id);
+  console.log('READING:', reading);
+
+  if (reading) {
+    if (reading.userId !== req.decodedToken.id) {
+      return res.status(401).json({ error: 'Only one\'s own reading lists can be marked read!' });
+    }
+
+    try {
+      reading.read = req.body.read;
+      await reading.save();
+      res.json(reading);
+    } catch (e) {
+      next(e);
+    }
+  } else {
+    res.status(204).end();
   }
 })
 
