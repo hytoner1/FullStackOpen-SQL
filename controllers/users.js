@@ -14,7 +14,9 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    const user = await User.create(req.body)
+    const user = await User.create({
+      ...req.body, date: new Date()
+    })
     res.json(user)
   } catch (e) {
     next(e);

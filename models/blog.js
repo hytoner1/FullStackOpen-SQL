@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require('sequelize')
+const { Model, DataTypes, INTEGER } = require('sequelize')
 
 const { sequelize } = require('../util/db')
 
@@ -24,12 +24,22 @@ Blog.init(
     likes: {
       type: DataTypes.INTEGER,
       defaultValue: 0
+    },
+    year: {
+      type: DataTypes.INTEGER,
+      validate: {
+        isInRange(value) {
+          if (value < 1991 || value > Date.now().year) {
+            throw new Error('Publishing year must be in range [1991, current year].');
+          }
+        }
+      }
     }
   },
   {
     sequelize,
     underscored: true,
-    timestamps: false,
+    timestamps: true,
     modelName: 'blog'
   }
 );
