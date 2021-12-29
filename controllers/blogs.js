@@ -3,7 +3,7 @@ const { Op } = require('sequelize');
 
 const { tokenExtractor } = require('../middleware/tokenExtractor');
 
-const { Blog, User } = require('../models');
+const { Blog, User, Session } = require('../models');
 
 
 const blogFinder = async (req, res, next) => {
@@ -73,6 +73,12 @@ router.post('/', tokenExtractor, async (req, res, next) => {
   console.log(req.body);
   try {
     const user = await User.findByPk(req.decodedToken.id);
+
+    const session = await Session.findByPk(req.decodedToken.sessionId);
+    if (!session) {
+      return res.status(401).json({ error: 'Session has expired!' });
+    }
+
     const blog = await Blog.create({
       ...req.body, userId: user.id, date: new Date()
     });
@@ -84,6 +90,11 @@ router.post('/', tokenExtractor, async (req, res, next) => {
 
 router.delete('/:id', [tokenExtractor, blogFinder], async (req, res) => {
   if (req.blog) {
+    const session = await Session.findByPk(req.decodedToken.sessionId);
+    if (!session) {
+      return res.status(401).json({ error: 'Session has expired!' });
+    }
+
     if (req.blog.userId !== req.decodedToken.id) {
       return res.status(401).json({ error: 'Only one\'s own posts can be deleted!' });
     }
