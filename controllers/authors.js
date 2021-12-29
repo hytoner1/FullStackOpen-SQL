@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const { Op, fn, col } = require('sequelize');
 
 const { Blog } = require('../models');
 const { sequelize } = require('../util/db');

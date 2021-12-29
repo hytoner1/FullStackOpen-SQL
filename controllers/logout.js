@@ -2,7 +2,7 @@ const router = require('express').Router()
 
 const { tokenExtractor } = require('../middleware/tokenExtractor');
 
-const { User, Session } = require('../models/index');
+const { Session } = require('../models/index');
 
 router.delete('/', tokenExtractor, async (req, res) => {
   console.log('DEC TOKEN:', req.decodedToken);
